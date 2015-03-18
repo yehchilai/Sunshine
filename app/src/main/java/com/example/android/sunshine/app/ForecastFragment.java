@@ -94,27 +94,10 @@ public class ForecastFragment extends Fragment {
         return rootView;
     }
 
-//    /**
-//     * Given a string of the form returned by the api call:
-//     * http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7
-//     * retrieve the maximum temperature for the day indicated by dayIndex
-//     * (Note: 0-indexed, so 0 would refer to the first day).
-//     */
-//    public static double getMaxTemperatureForDay(String weatherJsonStr, int dayIndex)
-//            throws JSONException {
-//        // TODO: add parsing code here
-//        JSONObject jObj = new JSONObject(weatherJsonStr);
-//        JSONArray jArray = jObj.getJSONArray("list");
-//
-//        JSONObject jObjDay = jArray.getJSONObject(dayIndex);
-//
-//        return jObjDay.getJSONObject("temp").getDouble("max");
-//    }
-
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
-
+        String[] weatherData;
 
         @Override
         protected String[] doInBackground(String... params) {
@@ -133,7 +116,7 @@ public class ForecastFragment extends Fragment {
             int days = 7;
 
             // json
-            String[] jsonParse = new String[days];
+            weatherData = new String[days];
 
             try {
                 final String Q_PARAM = "q";
@@ -152,7 +135,7 @@ public class ForecastFragment extends Fragment {
                         .appendQueryParameter(DAYS_PARAM, Integer.toString(days)).build();
 
                 URL url = new URL(buildUrl.toString());
-                Log.v(LOG_TAG, "### URL : " + buildUrl.toString() + " , "+ url.getPath());
+//                Log.v(LOG_TAG, "### URL : " + buildUrl.toString() + " , "+ url.getPath());
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -204,14 +187,28 @@ public class ForecastFragment extends Fragment {
 
             try
             {
-                jsonParse = getWeatherDataFromJson(forecastJsonStr, days);
+                weatherData = getWeatherDataFromJson(forecastJsonStr, days);
             }catch (JSONException e)
             {
                 Log.e(LOG_TAG, "Json Error ", e);
             }
 
-            return jsonParse;
+            return weatherData;
         }
+
+        @Override
+        protected void onPostExecute(String[] result) {
+            if(result != null)
+            {
+                forecastAdaptor.clear();
+                for(String dayData:result)
+                {
+                    forecastAdaptor.add(dayData);
+                }
+
+            }
+        }
+
 
         /* The date/time conversion code is going to be moved outside the asynctask later,
          * so for convenience we're breaking it out into its own method now.
@@ -305,12 +302,12 @@ public class ForecastFragment extends Fragment {
                 resultStrs[i] = day + " - " + description + " - " + highAndLow;
             }
 
-            for (String s : resultStrs) {
-                Log.v(LOG_TAG, "Forecast entry: " + s);
-            }
+//            for (String s : resultStrs) {
+//                Log.v(LOG_TAG, "Forecast entry: " + s);
+//            }
             return resultStrs;
-
         }
+
     }
 }
 
