@@ -12,8 +12,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -91,6 +93,16 @@ public class ForecastFragment extends Fragment {
 
         listView.setAdapter(forecastAdaptor);
 
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String dayData = forecastAdaptor.getItem(position);
+                Toast.makeText(getActivity(), dayData, Toast.LENGTH_LONG).show();
+            }
+        });
+
         return rootView;
     }
 
@@ -135,7 +147,7 @@ public class ForecastFragment extends Fragment {
                         .appendQueryParameter(DAYS_PARAM, Integer.toString(days)).build();
 
                 URL url = new URL(buildUrl.toString());
-//                Log.v(LOG_TAG, "### URL : " + buildUrl.toString() + " , "+ url.getPath());
+
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -165,12 +177,10 @@ public class ForecastFragment extends Fragment {
                     return null;
                 }
                 forecastJsonStr = buffer.toString();
-//                Log.v(LOG_TAG, "JSON forecast String : " + forecastJsonStr);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attempting
                 // to parse it.
-                //forecastJsonStr = null;
                 return null;
             } finally{
                 if (urlConnection != null) {
@@ -302,9 +312,6 @@ public class ForecastFragment extends Fragment {
                 resultStrs[i] = day + " - " + description + " - " + highAndLow;
             }
 
-//            for (String s : resultStrs) {
-//                Log.v(LOG_TAG, "Forecast entry: " + s);
-//            }
             return resultStrs;
         }
 
