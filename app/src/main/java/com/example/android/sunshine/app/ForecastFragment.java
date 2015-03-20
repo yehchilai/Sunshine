@@ -31,7 +31,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by MarkLai on 3/13/15.
@@ -72,22 +71,11 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-
-//        String[] fakeData = {
-//                "Today-Sunny-88/63",
-//                "Tomorrow-Sunny-80/62",
-//                "Monday-Sunny-83/63",
-//                "Tuesday-Sunny-82/64",
-//                "Wednesday-Sunny-81/65"
-//        };
-
-//        List<String> WeekForecast = new ArrayList<String>(Arrays.asList(fakeData));
-        List<String> WeekForecast = new ArrayList<String>();
         forecastAdaptor = new ArrayAdapter<String>(
                 getActivity(),
                 R.layout.list_item_forecast,
                 R.id.list_item_forecast_textview,
-                WeekForecast);
+                new ArrayList<String>());
 
         ListView listView = (ListView)rootView.findViewById(R.id.listView_forecast);
 
@@ -251,10 +239,22 @@ public class ForecastFragment extends Fragment {
         /**
          * Prepare the weather high/lows for presentation.
          */
-        private String formatHighLows(double high, double low) {
+        private String formatHighLows(double high, double low, String units) {
             // For presentation, assume the user doesn't care about tenths of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
+
+            if(units.equals(getString(R.string.pref_units_imperial)))
+            {
+                high = (high * 1.8) + 32;
+                low = (low * 1.8) + 32;
+                roundedHigh = Math.round(high);
+                roundedLow = Math.round(low);
+                //Log.d(LOG_TAG, "Unit type : " + units);
+            }else if(units.equals(getString(R.string.pref_units_metric)))
+            {
+                //Log.d(LOG_TAG, "Unit type : " + units);
+            }
 
             String highLowStr = roundedHigh + "/" + roundedLow;
             return highLowStr;
@@ -299,6 +299,12 @@ public class ForecastFragment extends Fragment {
             dayTime = new Time();
 
             String[] resultStrs = new String[numDays];
+
+            // set units
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String units = sharedPref
+                    .getString(getString(R.string.pref_units_key),getString(R.string.pref_units_default));
+
             for(int i = 0; i < weatherArray.length(); i++) {
                 // For now, using the format "Day, description, hi/low"
                 String day;
@@ -326,7 +332,7 @@ public class ForecastFragment extends Fragment {
                 double high = temperatureObject.getDouble(OWM_MAX);
                 double low = temperatureObject.getDouble(OWM_MIN);
 
-                highAndLow = formatHighLows(high, low);
+                highAndLow = formatHighLows(high, low, units);
                 resultStrs[i] = day + " - " + description + " - " + highAndLow;
             }
 
