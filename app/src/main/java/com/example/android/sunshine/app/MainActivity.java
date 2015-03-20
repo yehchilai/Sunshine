@@ -40,6 +40,13 @@ public class MainActivity extends ActionBarActivity {
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
+        }else if(id == R.id.action_menu)
+        {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            if(intent.resolveActivity(getPackageManager()) != null)
+            {
+                startActivity(intent);
+            }
         }
 
         return super.onOptionsItemSelected(item);
