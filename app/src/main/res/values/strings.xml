@@ -20,4 +20,6 @@
 
     <string name="action_map">Map Location</string>
 
+    <string name="action_share">Share</string>
+
 </resources>

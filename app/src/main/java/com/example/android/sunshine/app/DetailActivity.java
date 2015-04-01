@@ -3,9 +3,13 @@ package com.example.android.sunshine.app;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +17,8 @@ import android.widget.TextView;
 
 
 public class DetailActivity extends ActionBarActivity {
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +30,6 @@ public class DetailActivity extends ActionBarActivity {
                     .commit();
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -55,7 +60,12 @@ public class DetailActivity extends ActionBarActivity {
      */
     public static class DetailFragment extends Fragment {
 
+        String message;
+        private static final String LOG_TAG = DetailFragment.class.getSimpleName();
+        private static final String FORECAST_SHARE_HASHTAG = " #Sunshine";
+
         public DetailFragment() {
+            setHasOptionsMenu(true);
         }
 
         @Override
@@ -64,7 +74,7 @@ public class DetailActivity extends ActionBarActivity {
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
             Intent intent = getActivity().getIntent();
             if(intent != null && intent.hasExtra(Intent.EXTRA_TEXT)){
-                String message = intent.getStringExtra(Intent.EXTRA_TEXT);
+                message = intent.getStringExtra(Intent.EXTRA_TEXT);
 //                TextView textView = (TextView)rootView.findViewById(R.id.detailTextView);
 //                textView.setText(message);
                 ((TextView)rootView.findViewById(R.id.detailTextView))
@@ -72,5 +82,42 @@ public class DetailActivity extends ActionBarActivity {
             }
             return rootView;
         }
+
+        @Override
+        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+            // Inflate menu
+            inflater.inflate(R.menu.detailfragment, menu);
+
+            // Retrieve the share button
+            MenuItem menuItem = menu.findItem(R.id.action_share);
+
+            // Get the provider
+            ShareActionProvider shareActionProvider =
+                    (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+            // Attach intent to share provider
+            if(shareActionProvider != null){
+                shareActionProvider.setShareIntent(createShareForecastIntent());
+            }else{
+                Log.d(LOG_TAG, " Share action is null !!!");
+            }
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            return super.onOptionsItemSelected(item);
+
+        }
+
+        private Intent createShareForecastIntent(){
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, message + FORECAST_SHARE_HASHTAG);
+
+            return shareIntent;
+        }
+
     }
 }
