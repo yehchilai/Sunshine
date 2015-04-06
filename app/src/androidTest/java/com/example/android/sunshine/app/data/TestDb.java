@@ -15,11 +15,14 @@
  */
 package com.example.android.sunshine.app.data;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class TestDb extends AndroidTestCase {
 
@@ -111,22 +114,65 @@ public class TestDb extends AndroidTestCase {
         also make use of the ValidateCurrentRecord function from within TestUtilities.
     */
     public void testLocationTable() {
+        // Test data we're going to insert into the DB to see if it works.
+        String testLocationSetting = "99705";
+        String testCityName = "North Pole";
+        double testLatitude = 64.7488;
+        double testLongitude = -147.353;
+
         // First step: Get reference to writable database
+        SQLiteDatabase db = new WeatherDbHelper(this.mContext).getWritableDatabase();
 
         // Create ContentValues of what you want to insert
         // (you can use the createNorthPoleLocationValues if you wish)
+        ContentValues testValues = new ContentValues();
+        testValues.put(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING, testLocationSetting);
+        testValues.put(WeatherContract.LocationEntry.COLUMN_CITY_NAME, testCityName);
+        testValues.put(WeatherContract.LocationEntry.COLUMN_COORD_LAT, testLatitude);
+        testValues.put(WeatherContract.LocationEntry.COLUMN_COORD_LONG, testLongitude);
 
         // Insert ContentValues into database and get a row ID back
+        long rowID = db.insert(WeatherContract.LocationEntry.TABLE_NAME, null, testValues);
+
+//        if(rowID == -1)
+//        {
+//            Log.e(LOG_TAG, "### The row ID is -1. ");
+//            return;
+//        }
+        assertTrue("Error : Row ID is -1 ", rowID != -1);
 
         // Query the database and receive a Cursor back
+        Cursor cursor = db.query(WeatherContract.LocationEntry.TABLE_NAME
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null);
 
         // Move the cursor to a valid database row
+        assertTrue("Error : There is no data in the table", cursor.moveToFirst());
 
         // Validate data in resulting Cursor with the original ContentValues
         // (you can use the validateCurrentRecord function in TestUtilities to validate the
         // query if you like)
+        String error = "Error: Location Query Validation Failed";
+        Set<Map.Entry<String, Object>> valueSet = testValues.valueSet();
+        for(Map.Entry<String, Object> entry : valueSet){
+            String columnName = entry.getKey();
+            int index = cursor.getColumnIndex(columnName);
+            assertFalse("Column '" + columnName + "' not found. " + error, index == -1);
+            String expectedValue = entry.getValue().toString();
 
+            assertEquals("Value '" + entry.getValue().toString() +
+                    "' did not match the expected value '" +
+                    expectedValue + "'. " + error, expectedValue, cursor.getString(index));
+        }
+
+        assertFalse("Error : There is more than one row in the table.", cursor.moveToNext());
         // Finally, close the cursor and database
+        cursor.close();
+        db.close();
 
     }
 
