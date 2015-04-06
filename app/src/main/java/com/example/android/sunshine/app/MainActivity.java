@@ -12,7 +12,6 @@ import android.view.MenuItem;
 
 public class MainActivity extends ActionBarActivity {
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,6 +21,7 @@ public class MainActivity extends ActionBarActivity {
                     .add(R.id.container, new ForecastFragment())
                     .commit();
         }
+
     }
 
 
