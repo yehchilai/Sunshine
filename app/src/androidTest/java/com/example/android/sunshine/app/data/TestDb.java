@@ -190,23 +190,51 @@ public class TestDb extends AndroidTestCase {
         // we can move this code to insertLocation and then call insertLocation from both
         // tests. Why move it? We need the code to return the ID of the inserted location
         // and our testLocationTable can only return void because it's a test.
+        long testLocationKey = insertLocation();
 
         // First step: Get reference to writable database
+        SQLiteDatabase db = new WeatherDbHelper(mContext).getWritableDatabase();
+
 
         // Create ContentValues of what you want to insert
         // (you can use the createWeatherValues TestUtilities function if you wish)
-
+        ContentValues testValues = new ContentValues();
+        testValues.put(WeatherContract.WeatherEntry.COLUMN_LOC_KEY, testLocationKey);
+        testValues.put(WeatherContract.WeatherEntry.COLUMN_DATE, 1419033600L);
+        testValues.put(WeatherContract.WeatherEntry.COLUMN_DEGREES, 1.1);
+        testValues.put(WeatherContract.WeatherEntry.COLUMN_HUMIDITY, 1.2);
+        testValues.put(WeatherContract.WeatherEntry.COLUMN_PRESSURE, 1.3);
+        testValues.put(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP, 75);
+        testValues.put(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP, 65);
+        testValues.put(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC, "Asteroids");
+        testValues.put(WeatherContract.WeatherEntry.COLUMN_WIND_SPEED, 5.5);
+        testValues.put(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID, 321);
         // Insert ContentValues into database and get a row ID back
+        long rowID = db.insert(WeatherContract.WeatherEntry.TABLE_NAME, null,testValues);
+        assertTrue("Error : Cannot insert data. ", rowID != -1);
 
         // Query the database and receive a Cursor back
+        Cursor cursor = db.query(WeatherContract.WeatherEntry.TABLE_NAME
+        , null, null, null, null, null, null);
 
         // Move the cursor to a valid database row
+        assertTrue("Error : There is no first row in the table.", cursor.moveToFirst());
 
         // Validate data in resulting Cursor with the original ContentValues
         // (you can use the validateCurrentRecord function in TestUtilities to validate the
         // query if you like)
-
+        Set<Map.Entry<String, Object>> valueSet = testValues.valueSet();
+        for(Map.Entry<String, Object> entry : valueSet){
+            String columnName = entry.getKey();
+            int index = cursor.getColumnIndex(columnName);
+            assertTrue("Error : The column " + columnName + " is not existed.", index != -1);
+            String expectedValue = entry.getValue().toString();
+            assertEquals("Error : ExpectedValue = " + expectedValue + " , Value = " + cursor.getString(index)
+                    , expectedValue, cursor.getString(index));
+        }
         // Finally, close the cursor and database
+        cursor.close();
+        db.close();
     }
 
 
@@ -216,6 +244,28 @@ public class TestDb extends AndroidTestCase {
         testWeatherTable and testLocationTable.
      */
     public long insertLocation() {
-        return -1L;
+        // Test data we're going to insert into the DB to see if it works.
+        String testLocationSetting = "99705";
+        String testCityName = "North Pole";
+        double testLatitude = 64.7488;
+        double testLongitude = -147.353;
+
+        // First step: Get reference to writable database
+        SQLiteDatabase db = new WeatherDbHelper(this.mContext).getWritableDatabase();
+
+        // Create ContentValues of what you want to insert
+        // (you can use the createNorthPoleLocationValues if you wish)
+        ContentValues testValues = new ContentValues();
+        testValues.put(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING, testLocationSetting);
+        testValues.put(WeatherContract.LocationEntry.COLUMN_CITY_NAME, testCityName);
+        testValues.put(WeatherContract.LocationEntry.COLUMN_COORD_LAT, testLatitude);
+        testValues.put(WeatherContract.LocationEntry.COLUMN_COORD_LONG, testLongitude);
+
+        // Insert ContentValues into database and get a row ID back
+        long rowID = db.insert(WeatherContract.LocationEntry.TABLE_NAME, null, testValues);
+
+        assertTrue("Error : Row ID is -1 ", rowID != -1);
+        db.close();
+        return -rowID;
     }
 }
