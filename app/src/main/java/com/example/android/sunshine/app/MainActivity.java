@@ -52,9 +52,6 @@ public class MainActivity extends ActionBarActivity {
 
     private void openPreferenceLocation()
     {
-//        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-//        String location = sharedPref
-//                .getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
         String location = Utility.getPreferredLocation(this);
 
         Uri geoLocation = Uri.parse("geo:0,0?")
