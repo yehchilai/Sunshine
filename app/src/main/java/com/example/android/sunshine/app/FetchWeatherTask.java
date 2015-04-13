@@ -242,7 +242,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
                 cVVector.toArray(cvArray);
                 inserted = mContext.getContentResolver().bulkInsert(WeatherEntry.CONTENT_URI, cvArray);
             }
-            Log.d(LOG_TAG, "FetchWeatherTask Complete. " + cVVector.size() + " Inserted");
+            Log.d(LOG_TAG, "FetchWeatherTask Complete. " + inserted + " Inserted");
 
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
@@ -318,12 +318,16 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
                 return null;
             }
             forecastJsonStr = buffer.toString();
+            getWeatherDataFromJson(forecastJsonStr, locationQuery);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
             // If the code didn't successfully get the weather data, there's no point in attemping
             // to parse it.
 //            return null;
-        } finally {
+        } catch (JSONException e){
+            Log.e(LOG_TAG, e.getMessage(), e);
+            e.printStackTrace();
+        }finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
