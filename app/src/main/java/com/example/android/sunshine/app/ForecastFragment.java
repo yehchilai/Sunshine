@@ -25,7 +25,7 @@ import com.example.android.sunshine.app.data.WeatherContract;
  */
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private  static final int FORECAST_LOADER = 0;
+    private static final int FORECAST_LOADER = 0;
     private static ForecastAdapter mforecastAdapter;
     private String[] weatherInfo;
 
@@ -121,19 +121,14 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         super.onActivityCreated(savedInstanceState);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
+    // since we read the location when we create the loader, all we need to do is restart things
+    void onLocationChanged( ) {
         updateWeather();
+        getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }
 
     private void updateWeather() {
-//        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask(); // old FetchWeatherTask inner class
-//        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask(getActivity(), mforecastAdapter); // new FetchWeatherTask class
-//        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-//        String value = sharedPref
-//                .getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
-//        fetchWeatherTask.execute(value);
+
         FetchWeatherTask weatherTask = new FetchWeatherTask(getActivity());
         String location = Utility.getPreferredLocation(getActivity());
         weatherTask.execute(location);

@@ -83,27 +83,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
         return locationID;
     }
 
-    /*
-        Students: This code will allow the FetchWeatherTask to continue to return the strings that
-        the UX expects so that we can continue to test the application even once we begin using
-        the database.
-     */
-//    String[] convertContentValuesToUXFormat(Vector<ContentValues> cvv) {
-//        // return strings to keep UI functional for now
-//        String[] resultStrs = new String[cvv.size()];
-//        for ( int i = 0; i < cvv.size(); i++ ) {
-//            ContentValues weatherValues = cvv.elementAt(i);
-//            String highAndLow = formatHighLows(
-//                    weatherValues.getAsDouble(WeatherEntry.COLUMN_MAX_TEMP),
-//                    weatherValues.getAsDouble(WeatherEntry.COLUMN_MIN_TEMP));
-//            resultStrs[i] = getReadableDateString(
-//                    weatherValues.getAsLong(WeatherEntry.COLUMN_DATE)) +
-//                    " - " + weatherValues.getAsString(WeatherEntry.COLUMN_SHORT_DESC) +
-//                    " - " + highAndLow;
-//        }
-//        return resultStrs;
-//    }
-
     /**
      * Take the String representing the complete forecast in JSON Format and
      * pull out the data we need to construct the Strings needed for the wireframes.
@@ -240,6 +219,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
                 // Student: call bulkInsert to add the weatherEntries to the database here
                 ContentValues[] cvArray = new ContentValues[cVVector.size()];
                 cVVector.toArray(cvArray);
+                //Log.e("### Jason : ", cvArray[0].toString());
                 inserted = mContext.getContentResolver().bulkInsert(WeatherEntry.CONTENT_URI, cvArray);
             }
             Log.d(LOG_TAG, "FetchWeatherTask Complete. " + inserted + " Inserted");
@@ -318,14 +298,15 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
                 return null;
             }
             forecastJsonStr = buffer.toString();
+            //Log.e("### forecastJsonStr : ", forecastJsonStr);
             getWeatherDataFromJson(forecastJsonStr, locationQuery);
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Error ", e);
+            Log.e(LOG_TAG, " ### Error ", e);
             // If the code didn't successfully get the weather data, there's no point in attemping
             // to parse it.
 //            return null;
         } catch (JSONException e){
-            Log.e(LOG_TAG, e.getMessage(), e);
+            Log.e(LOG_TAG, " ### " + e.getMessage(), e);
             e.printStackTrace();
         }finally {
             if (urlConnection != null) {
