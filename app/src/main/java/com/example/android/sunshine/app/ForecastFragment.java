@@ -1,5 +1,6 @@
 package com.example.android.sunshine.app;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.android.sunshine.app.data.WeatherContract;
@@ -87,34 +89,28 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-//        /* Get Data from database */
-//        String locationSetting = Utility.getPreferredLocation(getActivity());
-//
-//        // Sort order:  Ascending, by date.
-//        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
-//        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
-//                locationSetting, System.currentTimeMillis());
-//
-//        Cursor cur = getActivity().getContentResolver().query(weatherForLocationUri,
-//                null, null, null, sortOrder);
-//
-//        /* New forecastAdapter*/
-//        mforecastAdapter = new ForecastAdapter(getActivity(), cur, 0);
         mforecastAdapter = new ForecastAdapter(getActivity(), null, 0);
         ListView listView = (ListView) rootView.findViewById(R.id.listView_forecast);
 
         listView.setAdapter(mforecastAdapter);
 
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                String dayData = mforecastAdapter.getItem(position);
-//                //Toast.makeText(getActivity(), dayData, Toast.LENGTH_LONG).show();
-//                Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
-//                        .putExtra(Intent.EXTRA_TEXT, dayData);
-//                startActivity(detailIntent);
-//            }
-//        });
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView adapterView, View view, int position, long l) {
+                // CursorAdapter returns a cursor at the correct position for getItem(), or null
+                // if it cannot seek to that position.
+                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
+                if (cursor != null) {
+                    String locationSetting = Utility.getPreferredLocation(getActivity());
+                    Intent intent = new Intent(getActivity(), DetailActivity.class)
+                            .setData(WeatherContract.WeatherEntry.buildWeatherLocationWithDate(
+                                    locationSetting, cursor.getLong(COL_WEATHER_DATE)
+                            ));
+                    startActivity(intent);
+                }
+            }
+        });
 
         return rootView;
     }
